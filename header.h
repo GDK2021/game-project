@@ -59,7 +59,6 @@ void affichage(app* app, int x, int y);
 void gestion_event(app* app,int* x, int* y);
 void creation(app *app);
 void initialisation(app* app);
-void quitter_score(app *app);
 //void damage(player* p1, int dmg);
 
 #endif // HEADER_H_INCLUDED

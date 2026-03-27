@@ -171,7 +171,7 @@ void creation(app *app) {
     if (!app->p1.health.surface) SDL_Exitwitherror("Erreur IMG_Load");
 
     app->p1.health.fheart = SDL_CreateTextureFromSurface(app->renderer, app->p1.health.surface);
-    SDL_FreeSurface(app->p1.surface);
+    SDL_FreeSurface(app->p1.health.surface);
     
     app->p1.health.surface = IMG_Load("src/eheart.png");
     if (!app->p1.health.surface) SDL_Exitwitherror("Erreur IMG_Load");
@@ -194,9 +194,8 @@ void creation(app *app) {
     app->p1.health.dstRect.h = 64;
     app->p1.health.dstRect.x = 1470;
     app->p1.health.dstRect.y = 20;
-      
-    SDL_QueryTexture(app->p1.health.fheart, NULL, NULL, &app->p1.health.srcRect.w, &app->p1.health.srcRect.h);
-    SDL_QueryTexture(app->p1.health.eheart, NULL, NULL, &app->p1.health.srcRect.w, &app->p1.health.srcRect.h);
+
+    // Keep srcRect at 64x64 (do NOT query texture dimensions here)
 
     app->p1.health.amount=3;
 }
@@ -280,17 +279,13 @@ void affichage(app* app, int x, int y) {
   }
     SDL_RenderCopy(app->renderer,app->p1.score.textTexture,NULL,&app->p1.score.textPosition);
     
-    x=app->p1.health.dstRect.x;
-    for(int i=0; i<app->p1.health.amount;i++){
-      SDL_RenderCopy(app->renderer,app->p1.health.fheart,NULL,&app->p1.health.dstRect);
-      app->p1.health.dstRect.x+=150;
-}
+    // Render full hearts using temporary rect
+    SDL_Rect heartRect = app->p1.health.dstRect;
+    for(int i=0; i<app->p1.health.amount; i++){
+        SDL_RenderCopy(app->renderer, app->p1.health.fheart, &app->p1.health.srcRect, &heartRect);
+        heartRect.x += 150;
+    }
     
-    for(int i=0; i<app->p1.health.amount - 3;i++){
-      SDL_RenderCopy(app->renderer,app->p1.health.eheart,NULL,&app->p1.health.dstRect);
-      app->p1.health.dstRect.x+=150;
-}
-    app->p1.health.dstRect.x=x;
     SDL_RenderPresent(app->renderer);
 }
 
