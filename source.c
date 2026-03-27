@@ -83,12 +83,11 @@ void creation_joueur(app *app)
 
         app->p1.tx.move_d[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
         SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.move_d[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
     }
 
     // Rect logic - corrected variable names
-    SDL_QueryTexture(app->p1.tx.move_d[0], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
-    SDL_QueryTexture(app->p1.tx.move_d[1], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
-    SDL_QueryTexture(app->p1.tx.move_d[2], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+    
 
     for (int i = 0; i < 3; i++)
     {
@@ -101,11 +100,42 @@ void creation_joueur(app *app)
 
         app->p1.tx.move_g[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
         SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.move_g[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+
     }
 
-    SDL_QueryTexture(app->p1.tx.move_g[0], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
-    SDL_QueryTexture(app->p1.tx.move_g[1], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
-    SDL_QueryTexture(app->p1.tx.move_g[2], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+    for (int i = 0; i < 3; i++)
+    {
+        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
+        sprintf(filename, "src/attack_g_%d.png", i + 1);
+
+        app->p1.surface = IMG_Load(filename);
+        if (!app->p1.surface)
+            SDL_Exitwitherror("Erreur chargement image");
+
+        app->p1.tx.attack_g[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
+        SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.attack_g[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+
+    }
+
+
+
+    for (int i = 0; i < 3; i++)
+    {
+        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
+        sprintf(filename, "src/attack_d_%d.png", i + 1);
+
+        app->p1.surface = IMG_Load(filename);
+        if (!app->p1.surface)
+            SDL_Exitwitherror("Erreur chargement image");
+
+        app->p1.tx.attack_d[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
+        SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.attack_d[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+
+    }
+
 
     app->p1.srcRect.x = 0;
     app->p1.srcRect.y = 0;
@@ -175,6 +205,48 @@ void creation_joueur(app *app)
     app->p1.health.amount = 1;
 }
 
+void attack(app *app)
+{
+    int frame;
+    switch (app->p1.state)
+    {
+    case attacking_R:
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[0], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[1], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[2], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        break;
+    case attacking_L:
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[0], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[1], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[2], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+        break;
+}
+app->p1.state=app->p1.laststate;
+}
+
 void gestion_event(app *app, int *x, int *y)
 {
     while (SDL_PollEvent(&app->event))
@@ -226,6 +298,15 @@ void gestion_event(app *app, int *x, int *y)
             {
                 app->p1.state = 5;
             }
+            else if (app->event.key.keysym.sym == SDLK_a)
+            {
+                if(app->p1.laststate==walking_R)
+                app->p1.state=7;
+                else if(app->p1.laststate==walking_L)
+                app->p1.state=8;
+                app->ticks=SDL_GetTicks();
+                attack(app);
+            }
 
             if (app->event.key.keysym.sym == SDLK_h)
             {
@@ -269,6 +350,7 @@ void afficher_perso(app *app)
         frame = ((SDL_GetTicks() - app->ticks) / 100) % 3;
         SDL_RenderCopy(app->renderer, app->p1.tx.move_g[frame], &app->p1.srcRect, &app->p1.dstRect);
         break;
+    
         /*
             case runing_L:
 

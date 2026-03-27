@@ -38,7 +38,8 @@ typedef enum {
   runing_R,  // 4
   jumping,   // 5
   crouching, // 6
-  attacking  // 7
+  attacking_R,  // 7
+  attacking_L  // 8
  }state_enum;
 
 typedef struct{
