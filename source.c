@@ -187,17 +187,17 @@ void creation(app *app) {
     app->p1.health.srcRect.x = 0;
     app->p1.health.srcRect.y = 0;
     
-    app->p1.health.srcRect.w = 64;
-    app->p1.health.srcRect.h = 64;
+    app->p1.health.srcRect.w = 120;
+    app->p1.health.srcRect.h = 112;
 
-    app->p1.health.dstRect.w = 64;
-    app->p1.health.dstRect.h = 64;
+    app->p1.health.dstRect.w = 120;
+    app->p1.health.dstRect.h = 120;
     app->p1.health.dstRect.x = 1470;
     app->p1.health.dstRect.y = 20;
 
     // Keep srcRect at 64x64 (do NOT query texture dimensions here)
 
-    app->p1.health.amount=3;
+    app->p1.health.amount=2;
 }
 
 
@@ -283,6 +283,11 @@ void affichage(app* app, int x, int y) {
     SDL_Rect heartRect = app->p1.health.dstRect;
     for(int i=0; i<app->p1.health.amount; i++){
         SDL_RenderCopy(app->renderer, app->p1.health.fheart, &app->p1.health.srcRect, &heartRect);
+        heartRect.x += 150;
+    }
+
+    for(int i=0; i<3 - app->p1.health.amount; i++){
+        SDL_RenderCopy(app->renderer, app->p1.health.eheart, &app->p1.health.srcRect, &heartRect);
         heartRect.x += 150;
     }
     
