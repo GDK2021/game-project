@@ -1,12 +1,16 @@
 #ifndef HEADER_H_INCLUDED
 #define HEADER_H_INCLUDED
 typedef struct{
-  SDL_Texture *text_d_1;
-  SDL_Texture *text_d_2;
-  SDL_Texture *text_d_3;
-  SDL_Texture *text_g_1;
-  SDL_Texture *text_g_2;
-  SDL_Texture *text_g_3;
+  SDL_Texture *move_d [3];
+  SDL_Texture *move_g [3];
+  SDL_Texture *attack_d [3];
+  SDL_Texture *attack_g [3];
+  SDL_Texture *jump_d [3];
+  SDL_Texture *jump_g [3];
+  SDL_Texture *crouch_d [3];
+  SDL_Texture *crouch_g [3];
+  SDL_Texture *run_d [3];
+  SDL_Texture *run_g [3];
 }textures;
 
 typedef struct{
@@ -26,21 +30,33 @@ typedef struct{
   SDL_Color color;
 }score;
 
+typedef enum {
+  standing,  // 0
+  walking_L, // 1
+  walking_R, // 2
+  runing_L,  // 3
+  runing_R,  // 4
+  jumping,   // 5
+  crouching, // 6
+  attacking  // 7
+ }state_enum;
 
 typedef struct{
-  int state; 
+  state_enum state;
+  state_enum laststate;
   textures tx;
   SDL_Surface *surface;
   SDL_Rect srcRect; 
   SDL_Rect dstRect;
   score score;
   health health;
-  int dir;
+  int velocity;
 }player;
 
 
 
 typedef struct{
+  int ticks;
   SDL_Window *window ;
   SDL_Renderer *renderer ;
   SDL_Event event;
@@ -57,8 +73,9 @@ void SDL_Exitwitherror(const char *msg);
 void quitter(app* app);
 void affichage(app* app, int x, int y);
 void gestion_event(app* app,int* x, int* y);
-void creation(app *app);
+void creation_joueur(app *app);
 void initialisation(app* app);
-//void damage(player* p1, int dmg);
+void afficher_perso(app* app);
+void afficher_health(app* app);
 
 #endif // HEADER_H_INCLUDED
