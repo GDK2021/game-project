@@ -10,36 +10,37 @@
 #define win_w 1920
 #define win_h 1080
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     app app = {0};
     initialisation(&app);
-    creation(&app);
-    app.p1.dir=1;
-
-    app.running=1;
-    //Mix_PlayChannel(-1, app.son, 0);
-    // Coordonnées souris
-    int x=0,y=0;
-    app.p1.state=1;
+    creation_joueur(&app);
+    app.p1.health.amount = 3;
+    app.p1.state=standing;
+    app.ticks = 0;
+    app.p1.laststate = walking_R;
+    app.running = 1;
+    // Mix_PlayChannel(-1, app.son, 0);
+    //  Coordonnées souris
+    int x = 0, y = 0;
     // ==============================
     // Boucle principale
     // ==============================
-    
-    while (app.running) {
-        
-            
-              
+
+    while (app.running)
+    {
+
         // ==============================
         // Gestion des événements
         // ==============================
 
-        gestion_event(&app,&x,&y);
-        
-        affichage(&app,x,y);
+        gestion_event(&app, &x, &y);
+
+        affichage(&app, x, y);
         SDL_Delay(16);
     }
 
-    //quitter(&app);
+    // quitter(&app);
     SDL_Quit();
 
     return 0;
