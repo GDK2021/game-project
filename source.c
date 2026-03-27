@@ -150,7 +150,7 @@ void creation(app *app) {
     app->p1.score.color.b = 255;
     app->p1.score.color.a = 255;
     
-    app->p1.score.textSurface = TTF_RenderText_Solid(app->p1.score.font,"01235",app->p1.score.color);
+    app->p1.score.textSurface = TTF_RenderText_Solid(app->p1.score.font,"0001235",app->p1.score.color);
     if(app->p1.score.textSurface==NULL) SDL_Exitwitherror("erreur creation surface de txt");
     
     app->p1.score.textTexture = SDL_CreateTextureFromSurface(app->renderer, app->p1.score.textSurface);
