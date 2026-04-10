@@ -204,7 +204,22 @@ void creation_joueur(app *app)
 
     app->p1.health.amount = 1;
 }
+void afficher_vie(app *app)
+{
+    // Render full hearts using temporary rect
+    SDL_Rect heartRect = app->p1.health.dstRect;
+    for (int i = 0; i < app->p1.health.amount; i++)
+    {
+        SDL_RenderCopy(app->renderer, app->p1.health.fheart, &app->p1.health.srcRect, &heartRect);
+        heartRect.x += 150;
+    }
 
+    for (int i = 0; i < 3 - app->p1.health.amount; i++)
+    {
+        SDL_RenderCopy(app->renderer, app->p1.health.eheart, &app->p1.health.srcRect, &heartRect);
+        heartRect.x += 150;
+    }
+}
 void attack(app *app)
 {
     int frame;
@@ -213,16 +228,21 @@ void attack(app *app)
     case attacking_R:
         SDL_RenderClear(app->renderer);
         SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[0], &app->p1.srcRect, &app->p1.dstRect);
+        afficher_vie(app);
         SDL_RenderPresent(app->renderer);
         SDL_Delay(150);
 
         SDL_RenderClear(app->renderer);
         SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[1], &app->p1.srcRect, &app->p1.dstRect);
+        afficher_vie(app);
+
         SDL_RenderPresent(app->renderer);
         SDL_Delay(150);
 
         SDL_RenderClear(app->renderer);
         SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[2], &app->p1.srcRect, &app->p1.dstRect);
+        afficher_vie(app);
+
         SDL_RenderPresent(app->renderer);
         SDL_Delay(150);
 
@@ -311,11 +331,13 @@ void gestion_event(app *app, int *x, int *y)
             if (app->event.key.keysym.sym == SDLK_h)
             {
                 app->p1.health.amount++;
+                app->p1.state=0;
             }
 
             if (app->event.key.keysym.sym == SDLK_k)
             {
                 app->p1.health.amount--;
+                app->p1.state=0;
             }
         }
         if (app->event.type == SDL_KEYUP)
@@ -336,6 +358,8 @@ void afficher_perso(app *app)
         if(app->p1.laststate==walking_L)
         SDL_RenderCopy(app->renderer, app->p1.tx.move_g[0], &app->p1.srcRect, &app->p1.dstRect);
         else if(app->p1.laststate==walking_R)
+        SDL_RenderCopy(app->renderer, app->p1.tx.move_d[0], &app->p1.srcRect, &app->p1.dstRect);
+        else
         SDL_RenderCopy(app->renderer, app->p1.tx.move_d[0], &app->p1.srcRect, &app->p1.dstRect);
         break;
 
@@ -371,22 +395,7 @@ void afficher_perso(app *app)
 }
 
 }
-void afficher_vie(app *app)
-{
-    // Render full hearts using temporary rect
-    SDL_Rect heartRect = app->p1.health.dstRect;
-    for (int i = 0; i < app->p1.health.amount; i++)
-    {
-        SDL_RenderCopy(app->renderer, app->p1.health.fheart, &app->p1.health.srcRect, &heartRect);
-        heartRect.x += 150;
-    }
 
-    for (int i = 0; i < 3 - app->p1.health.amount; i++)
-    {
-        SDL_RenderCopy(app->renderer, app->p1.health.eheart, &app->p1.health.srcRect, &heartRect);
-        heartRect.x += 150;
-    }
-}
 void affichage(app *app, int x, int y)
 {
     SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
