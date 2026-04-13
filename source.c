@@ -1,0 +1,429 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_ttf.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "header.h"
+
+#define win_w 1920
+#define win_h 1080
+
+/*
+menu principal 0
+menu option    1
+menu joueur    2/3
+menu quiz      4/5
+menu score     6
+menu save      7/8
+*/
+
+void SDL_Exitwitherror(const char *msg)
+{
+    SDL_Log("erreur : %s > %s\n", msg, SDL_GetError());
+    SDL_Quit();
+    exit(EXIT_FAILURE);
+}
+
+void initialisation(app *app)
+{
+    // Basic SDL Init
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
+    {
+        SDL_Exitwitherror("SDL_Init fail");
+    }
+
+    // Mixer Init
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+        SDL_Exitwitherror("initialisation son echouee");
+
+    if (TTF_Init() == -1)
+        SDL_Exitwitherror("initialisation du text echouee ");
+
+    // Logic control
+    app->running = 1;
+
+    srand(time(NULL));
+
+    // Window Creation
+    app->window = SDL_CreateWindow(
+        "Atelier SDL2 - Scenario 1",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        win_w, win_h,
+        SDL_WINDOW_FULLSCREEN);
+
+    if (!app->window)
+        SDL_Exitwitherror("Erreur SDL_CreateWindow");
+
+    // Renderer Creation - Use app->window, not 'window'
+    app->renderer = SDL_CreateRenderer(app->window, -1, SDL_RENDERER_ACCELERATED);
+    if (!app->renderer)
+        SDL_Exitwitherror("Erreur Renderer");
+
+    // Image Init
+    if (!(IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG)))
+        SDL_Exitwitherror("Erreur image");
+}
+
+void creation_joueur(app *app)
+{
+    char filename[50];
+
+    // Chargement des animations vers la droite
+    for (int i = 0; i < 3; i++)
+    {
+        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
+        sprintf(filename, "src/player_d_%d.png", i + 1);
+
+        app->p1.surface = IMG_Load(filename);
+        if (!app->p1.surface)
+            SDL_Exitwitherror("Erreur chargement image");
+
+        app->p1.tx.move_d[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
+        SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.move_d[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+    }
+
+    // Rect logic - corrected variable names
+    
+
+    for (int i = 0; i < 3; i++)
+    {
+        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
+        sprintf(filename, "src/player_g_%d.png", i + 1);
+
+        app->p1.surface = IMG_Load(filename);
+        if (!app->p1.surface)
+            SDL_Exitwitherror("Erreur chargement image");
+
+        app->p1.tx.move_g[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
+        SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.move_g[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+
+    }
+
+    for (int i = 0; i < 3; i++)
+    {
+        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
+        sprintf(filename, "src/attack_g_%d.png", i + 1);
+
+        app->p1.surface = IMG_Load(filename);
+        if (!app->p1.surface)
+            SDL_Exitwitherror("Erreur chargement image");
+
+        app->p1.tx.attack_g[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
+        SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.attack_g[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+
+    }
+
+
+
+    for (int i = 0; i < 3; i++)
+    {
+        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
+        sprintf(filename, "src/attack_d_%d.png", i + 1);
+
+        app->p1.surface = IMG_Load(filename);
+        if (!app->p1.surface)
+            SDL_Exitwitherror("Erreur chargement image");
+
+        app->p1.tx.attack_d[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
+        SDL_FreeSurface(app->p1.surface);
+        SDL_QueryTexture(app->p1.tx.attack_d[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
+
+    }
+
+
+    app->p1.srcRect.x = 0;
+    app->p1.srcRect.y = 0;
+
+    app->p1.dstRect.w = app->p1.srcRect.w;
+    app->p1.dstRect.h = app->p1.srcRect.h;
+    app->p1.dstRect.x = 480;
+    app->p1.dstRect.y = 540;
+
+    app->p1.state = standing;
+
+    app->p1.score.font = TTF_OpenFont("src/ka1.ttf", 50);
+    if (app->p1.score.font == NULL)
+        SDL_Exitwitherror("erreur chargement police");
+
+    app->p1.score.color.r = 0;
+    app->p1.score.color.g = 255;
+    app->p1.score.color.b = 255;
+    app->p1.score.color.a = 255;
+
+    app->p1.score.textSurface = TTF_RenderText_Solid(app->p1.score.font, "1235", app->p1.score.color);
+    if (app->p1.score.textSurface == NULL)
+        SDL_Exitwitherror("erreur creation surface de txt");
+
+    app->p1.score.textTexture = SDL_CreateTextureFromSurface(app->renderer, app->p1.score.textSurface);
+
+    SDL_FreeSurface(app->p1.score.textSurface);
+
+    SDL_QueryTexture(app->p1.score.textTexture,
+                     NULL,
+                     NULL,
+                     &app->p1.score.textPosition.w,
+                     &app->p1.score.textPosition.h);
+
+    app->p1.score.textPosition.x = 1620;
+    app->p1.score.textPosition.y = 150;
+
+    app->p1.health.surface = IMG_Load("src/fheart.png");
+    if (!app->p1.health.surface)
+        SDL_Exitwitherror("Erreur IMG_Load");
+
+    app->p1.health.fheart = SDL_CreateTextureFromSurface(app->renderer, app->p1.health.surface);
+    SDL_FreeSurface(app->p1.health.surface);
+
+    app->p1.health.surface = IMG_Load("src/eheart.png");
+    if (!app->p1.health.surface)
+        SDL_Exitwitherror("Erreur IMG_Load");
+
+    app->p1.health.eheart = SDL_CreateTextureFromSurface(app->renderer, app->p1.health.surface);
+    SDL_FreeSurface(app->p1.health.surface);
+
+    // Rect logic - corrected variable names
+
+    app->p1.health.srcRect.x = 0;
+    app->p1.health.srcRect.y = 0;
+
+    app->p1.health.srcRect.w = 120;
+    app->p1.health.srcRect.h = 112;
+
+    app->p1.health.dstRect.w = 120;
+    app->p1.health.dstRect.h = 120;
+    app->p1.health.dstRect.x = 1470;
+    app->p1.health.dstRect.y = 20;
+
+    // Keep srcRect at 64x64 (do NOT query texture dimensions here)
+
+    app->p1.health.amount = 1;
+}
+void afficher_vie(app *app)
+{
+    // Render full hearts using temporary rect
+    SDL_Rect heartRect = app->p1.health.dstRect;
+    for (int i = 0; i < app->p1.health.amount; i++)
+    {
+        SDL_RenderCopy(app->renderer, app->p1.health.fheart, &app->p1.health.srcRect, &heartRect);
+        heartRect.x += 150;
+    }
+
+    for (int i = 0; i < 3 - app->p1.health.amount; i++)
+    {
+        SDL_RenderCopy(app->renderer, app->p1.health.eheart, &app->p1.health.srcRect, &heartRect);
+        heartRect.x += 150;
+    }
+}
+void attack(app *app)
+{
+    int frame;
+    switch (app->p1.state)
+    {
+    case attacking_R:
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[0], &app->p1.srcRect, &app->p1.dstRect);
+        afficher_vie(app);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[1], &app->p1.srcRect, &app->p1.dstRect);
+        afficher_vie(app);
+
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[2], &app->p1.srcRect, &app->p1.dstRect);
+        afficher_vie(app);
+
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        break;
+    case attacking_L:
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[0], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[1], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+
+        SDL_RenderClear(app->renderer);
+        SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[2], &app->p1.srcRect, &app->p1.dstRect);
+        SDL_RenderPresent(app->renderer);
+        SDL_Delay(150);
+        break;
+}
+app->p1.state=app->p1.laststate;
+}
+
+void gestion_event(app *app, int *x, int *y)
+{
+    while (SDL_PollEvent(&app->event))
+    {
+        if (app->event.type == SDL_QUIT)
+        {
+            app->running = 0;
+        }
+        SDL_GetMouseState(x, y);
+
+        if (app->event.type == SDL_KEYDOWN)
+        {
+            if (app->event.key.keysym.sym == SDLK_ESCAPE)
+            {
+                app->running = 0;
+            }
+
+            if (app->event.key.keysym.sym == SDLK_d)
+            {
+                if (app->ticks == 0)
+                    app->ticks = SDL_GetTicks();
+                if (app->event.key.keysym.sym == SDLK_LSHIFT)
+                {
+                    app->p1.state = 4;
+                }
+                else
+                {
+                    app->p1.state = 2;
+                }
+                
+            }
+            else if (app->event.key.keysym.sym == SDLK_s)
+            {
+                app->p1.state = 6;
+            }
+            else if (app->event.key.keysym.sym == SDLK_q)
+            {
+                if (app->event.key.keysym.sym == SDLK_LSHIFT)
+                {
+                    app->p1.state = 3;
+                }
+                else
+                {
+                    app->p1.state = 1;
+                }
+                
+            }
+            else if (app->event.key.keysym.sym == SDLK_z)
+            {
+                app->p1.state = 5;
+            }
+            else if (app->event.key.keysym.sym == SDLK_a)
+            {
+                if(app->p1.laststate==walking_R)
+                app->p1.state=7;
+                else if(app->p1.laststate==walking_L)
+                app->p1.state=8;
+                app->ticks=SDL_GetTicks();
+                attack(app);
+            }
+
+            if (app->event.key.keysym.sym == SDLK_h)
+            {
+                app->p1.health.amount++;
+                app->p1.state=0;
+            }
+
+            if (app->event.key.keysym.sym == SDLK_k)
+            {
+                app->p1.health.amount--;
+                app->p1.state=0;
+            }
+        }
+        if (app->event.type == SDL_KEYUP)
+        {
+            app->p1.laststate = app->p1.state;
+            app->p1.state = 0;
+            app->ticks = 0;
+        }
+    }
+}
+
+void afficher_perso(app *app)
+{
+    int frame;
+    switch (app->p1.state)
+    {
+        case standing:
+        if(app->p1.laststate==walking_L)
+        SDL_RenderCopy(app->renderer, app->p1.tx.move_g[0], &app->p1.srcRect, &app->p1.dstRect);
+        else if(app->p1.laststate==walking_R)
+        SDL_RenderCopy(app->renderer, app->p1.tx.move_d[0], &app->p1.srcRect, &app->p1.dstRect);
+        else
+        SDL_RenderCopy(app->renderer, app->p1.tx.move_d[0], &app->p1.srcRect, &app->p1.dstRect);
+        break;
+
+    case walking_R:
+        app->p1.dstRect.x += 10;
+        frame = ((SDL_GetTicks() - app->ticks) / 100) % 3;
+        SDL_RenderCopy(app->renderer, app->p1.tx.move_d[frame], &app->p1.srcRect, &app->p1.dstRect);
+        break;
+
+    case walking_L:
+        app->p1.dstRect.x -= 10;
+        frame = ((SDL_GetTicks() - app->ticks) / 100) % 3;
+        SDL_RenderCopy(app->renderer, app->p1.tx.move_g[frame], &app->p1.srcRect, &app->p1.dstRect);
+        break;
+    
+        /*
+            case runing_L:
+
+                break;
+
+            case runing_R:
+
+                break;
+            case jumping:
+
+                break;
+            case crouching:
+
+                break;
+
+
+            */
+}
+
+}
+
+void affichage(app *app, int x, int y)
+{
+    SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
+    SDL_RenderClear(app->renderer);
+    afficher_perso(app);
+    // affichage score
+    SDL_RenderCopy(app->renderer, app->p1.score.textTexture, NULL, &app->p1.score.textPosition);
+
+    afficher_vie(app);
+
+    SDL_RenderPresent(app->renderer);
+}
+
+void quitter(app *app)
+{
+
+    // app->cm=-1;
+    // free_menu(app,app->cm);
+    // Mix_CloseAudio();
+    /*
+    SDL_DestroyRenderer(app->renderer);
+    SDL_DestroyWindow(app->window);
+    IMG_Quit();
+    SDL_Quit(); */
+}
+
+/*
+void damage(player* p1, int dmg){
+  p1->health-=dmg;
+}
+*/
