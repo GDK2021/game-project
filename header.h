@@ -52,6 +52,11 @@ typedef struct{
   score score;
   health health;
   int velocity;
+  int attack_ticks;
+  int last_attack_time;
+  int up;           
+  float jump_x;     
+  int posy_init; 
 }player;
 
 
@@ -77,6 +82,7 @@ void gestion_event(app* app,int* x, int* y);
 void creation_joueur(app *app);
 void initialisation(app* app);
 void afficher_perso(app* app);
-void afficher_health(app* app);
+void afficher_vie(app* app);
+void saut(app *app);
 
 #endif // HEADER_H_INCLUDED
