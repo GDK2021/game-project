@@ -9,6 +9,8 @@ typedef struct{
   SDL_Texture *jump_g [3];
   SDL_Texture *crouch_d [3];
   SDL_Texture *crouch_g [3];
+  SDL_Texture *crouch_walking_d [3];
+  SDL_Texture *crouch_walking_g [3];
   SDL_Texture *run_d [3];
   SDL_Texture *run_g [3];
 }textures;
@@ -52,6 +54,11 @@ typedef struct{
   score score;
   health health;
   int velocity;
+  int move_ticks;
+  int last_attack_time;
+  int up;           
+  float jump_x;     
+  int posy_init; 
 }player;
 
 
@@ -77,6 +84,7 @@ void gestion_event(app* app,int* x, int* y);
 void creation_joueur(app *app);
 void initialisation(app* app);
 void afficher_perso(app* app);
-void afficher_health(app* app);
-
+void afficher_vie(app* app);
+void saut(app *app);
+void loadtexture(app *app, const char *framename, SDL_Texture *(*dest)[3]);
 #endif // HEADER_H_INCLUDED
