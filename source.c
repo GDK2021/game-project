@@ -30,7 +30,7 @@ void initialisation(app *app)
 {
     // Basic SDL Init
     app->p1.last_attack_time = 0;
-    app->p1.move_ticks = 0;
+    app->p1.move_ticks       = 0;
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0)
     {
         SDL_Exitwitherror("SDL_Init fail");
@@ -104,7 +104,6 @@ void creation_joueur(app *app)
     sprintf(framename,"src/crouch_g_");
     loadtexture(app,framename,&app->p1.tx.crouch_g);
 
-<<<<<<< HEAD
     sprintf(framename,"src/attack_d_");
     loadtexture(app,framename,&app->p1.tx.attack_d);
 
@@ -113,52 +112,6 @@ void creation_joueur(app *app)
 
    
 
-=======
-    // Rect logic - corrected variable names
-
-    for (int i = 0; i < 3; i++)
-    {
-        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
-        sprintf(filename, "src/player_g_%d.png", i + 1);
-
-        app->p1.surface = IMG_Load(filename);
-        if (!app->p1.surface)
-            SDL_Exitwitherror("Erreur chargement image");
-
-        app->p1.tx.move_g[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
-        SDL_FreeSurface(app->p1.surface);
-        SDL_QueryTexture(app->p1.tx.move_g[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
-    }
-
-    for (int i = 0; i < 3; i++)
-    {
-        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
-        sprintf(filename, "src/attack_g_%d.png", i + 1);
-
-        app->p1.surface = IMG_Load(filename);
-        if (!app->p1.surface)
-            SDL_Exitwitherror("Erreur chargement image");
-
-        app->p1.tx.attack_g[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
-        SDL_FreeSurface(app->p1.surface);
-        SDL_QueryTexture(app->p1.tx.attack_g[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
-    }
-
-    for (int i = 0; i < 3; i++)
-    {
-        // On construit le nom du fichier dynamiquement : "src/player_d_1.png", etc.
-        sprintf(filename, "src/attack_d_%d.png", i + 1);
-
-        app->p1.surface = IMG_Load(filename);
-        if (!app->p1.surface)
-            SDL_Exitwitherror("Erreur chargement image");
-
-        app->p1.tx.attack_d[i] = SDL_CreateTextureFromSurface(app->renderer, app->p1.surface);
-        SDL_FreeSurface(app->p1.surface);
-        SDL_QueryTexture(app->p1.tx.attack_d[i], NULL, NULL, &app->p1.srcRect.w, &app->p1.srcRect.h);
-    }
-
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
     app->p1.srcRect.x = 0;
     app->p1.srcRect.y = 0;
 
@@ -280,7 +233,6 @@ void afficher_vie(app *app)
 
 void gestion_event(app *app, int *x, int *y)
 {
-<<<<<<< HEAD
     // End attack animation after 300ms, then start cooldown
     if (app->p1.state == attacking_L || app->p1.state == attacking_R)
     {
@@ -291,21 +243,6 @@ void gestion_event(app *app, int *x, int *y)
         }
     }
 
-=======
-    int attacking = (app->p1.state == attacking_L || app->p1.state == attacking_R);
-
-    // Check if attack animation is done
-    if (attacking)
-    {
-        if (SDL_GetTicks() - app->p1.attack_ticks >= 300)
-        {
-            app->p1.state = standing;
-            app->p1.last_attack_time = SDL_GetTicks(); // cooldown starts here
-        }
-    }
-
-    // Single event loop — always runs
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
     while (SDL_PollEvent(&app->event))
     {
         if (app->event.type == SDL_QUIT)
@@ -313,7 +250,6 @@ void gestion_event(app *app, int *x, int *y)
 
         SDL_GetMouseState(x, y);
 
-<<<<<<< HEAD
         // FIX 1: clean attack block with continue — no brace mismatch
         if (app->p1.state == attacking_L || app->p1.state == attacking_R)
         {
@@ -321,15 +257,6 @@ void gestion_event(app *app, int *x, int *y)
                 app->event.key.keysym.sym == SDLK_ESCAPE)
                 app->running = 0;
             continue; // skip all other input while attacking
-=======
-        // Block input during attack (except quit/escape)
-        if (app->p1.state == attacking_L || app->p1.state == attacking_R)
-        {
-            if (app->event.type == SDL_KEYDOWN)
-                if (app->event.key.keysym.sym == SDLK_ESCAPE)
-                    app->running = 0;
-            continue; // ← skip everything else
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
         }
 
         if (app->event.type == SDL_KEYDOWN)
@@ -340,31 +267,16 @@ void gestion_event(app *app, int *x, int *y)
             else if (app->event.key.keysym.sym == SDLK_d)
             {
                 if (app->ticks == 0) app->ticks = SDL_GetTicks();
-<<<<<<< HEAD
                 app->p1.state = walking_R;
-=======
-                if (SDL_GetModState() & KMOD_LSHIFT)
-                    app->p1.state = runing_R;
-                else
-                    app->p1.state = walking_R;
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
             }
             else if (app->event.key.keysym.sym == SDLK_q)
             {
                 if (app->ticks == 0) app->ticks = SDL_GetTicks();
-<<<<<<< HEAD
                 app->p1.state = walking_L;
-=======
-                if (SDL_GetModState() & KMOD_LSHIFT)
-                    app->p1.state = runing_L;
-                else
-                    app->p1.state = walking_L;
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
             }
             else if (app->event.key.keysym.sym == SDLK_s)
                 app->p1.state = crouching;
             else if (app->event.key.keysym.sym == SDLK_z)
-<<<<<<< HEAD
             {
                 if (app->p1.up == 0)
                 {
@@ -382,25 +294,6 @@ void gestion_event(app *app, int *x, int *y)
                 {
                     app->p1.move_ticks = now;
                     if (app->p1.laststate == walking_R)
-=======
-                {
-                    if (app->p1.up == 0) // can't jump while already jumping
-                    {
-                        app->p1.up = 1;
-                        app->p1.jump_x = -50.0f;
-                        app->p1.posy_init = app->p1.dstRect.y;
-                        app->p1.state = jumping;
-                    }
-                }
-            else if (app->event.key.keysym.sym == SDLK_a)
-            {
-                 
-                int now = SDL_GetTicks();
-                if (now - app->p1.last_attack_time >= ATTACK_COOLDOWN)
-                {
-                    app->p1.attack_ticks = now;
-                    if (app->p1.laststate == walking_R || app->p1.laststate == runing_R)
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
                         app->p1.state = attacking_R;
                     else
                         app->p1.state = attacking_L;
@@ -413,7 +306,6 @@ void gestion_event(app *app, int *x, int *y)
             else if (app->event.key.keysym.sym == SDLK_k)
             {
                 if (app->p1.health.amount > 0) app->p1.health.amount--;
-<<<<<<< HEAD
             }
             else if (app->event.key.keysym.sym == SDLK_p)
             {
@@ -424,28 +316,21 @@ void gestion_event(app *app, int *x, int *y)
                     fprintf(f, "y: %d\n", app->p1.dstRect.y);
                     fclose(f);
                 }
-=======
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
             }
         }
 
         if (app->event.type == SDL_KEYUP)
         {
-<<<<<<< HEAD
             if (app->p1.state != attacking_L && app->p1.state != attacking_R)
             {
                 app->p1.laststate = app->p1.state;
                 app->p1.state     = standing;
                 app->ticks        = 0;
             }
-=======
-            app->p1.laststate = app->p1.state;
-            app->p1.state = standing;
-            app->ticks = 0;
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
         }
     }
 }
+
 void afficher_perso(app *app)
 {
     int frame;
@@ -454,11 +339,6 @@ void afficher_perso(app *app)
     case standing:
         if (app->p1.laststate == walking_L)
             SDL_RenderCopy(app->renderer, app->p1.tx.move_g[0], &app->p1.srcRect, &app->p1.dstRect);
-<<<<<<< HEAD
-=======
-        else if (app->p1.laststate == walking_R)
-            SDL_RenderCopy(app->renderer, app->p1.tx.move_d[0], &app->p1.srcRect, &app->p1.dstRect);
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
         else
             SDL_RenderCopy(app->renderer, app->p1.tx.move_d[0], &app->p1.srcRect, &app->p1.dstRect);
         break;
@@ -478,16 +358,11 @@ void afficher_perso(app *app)
         break;
 
     case attacking_R:
-<<<<<<< HEAD
         frame = ((SDL_GetTicks() - app->p1.move_ticks) / 100) % 3;
-=======
-        frame = ((SDL_GetTicks() - app->p1.attack_ticks) / 100) % 3;
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
         SDL_RenderCopy(app->renderer, app->p1.tx.attack_d[frame], &app->p1.srcRect, &app->p1.dstRect);
         break;
 
     case attacking_L:
-<<<<<<< HEAD
         frame = ((SDL_GetTicks() - app->p1.move_ticks) / 100) % 3;
         SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[frame], &app->p1.srcRect, &app->p1.dstRect);
         break;
@@ -504,18 +379,6 @@ void afficher_perso(app *app)
     default: break;
     }
 }
-=======
-        frame = ((SDL_GetTicks() - app->p1.attack_ticks) / 100) % 3;
-        SDL_RenderCopy(app->renderer, app->p1.tx.attack_g[frame], &app->p1.srcRect, &app->p1.dstRect);
-        break;
-
-    case jumping:
-
-        break;
-    }
-}
-
->>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
 void affichage(app *app, int x, int y)
 {
     SDL_SetRenderDrawColor(app->renderer, 0, 0, 0, 255);
