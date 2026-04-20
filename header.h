@@ -54,7 +54,11 @@ typedef struct{
   score score;
   health health;
   int velocity;
+<<<<<<< HEAD
   int move_ticks;
+=======
+  int attack_ticks;
+>>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
   int last_attack_time;
   int up;           
   float jump_x;     
@@ -86,5 +90,10 @@ void initialisation(app* app);
 void afficher_perso(app* app);
 void afficher_vie(app* app);
 void saut(app *app);
+<<<<<<< HEAD
 void loadtexture(app *app, const char *framename, SDL_Texture *(*dest)[3]);
 #endif // HEADER_H_INCLUDED
+=======
+
+#endif // HEADER_H_INCLUDED
+>>>>>>> 37b0399646845de73f000a0eee9ed1a98099a992
